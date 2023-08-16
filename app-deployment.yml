@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+        - name: api
+          image: your-image-name:your-image-tag  # Replace with your actual image name and tag
+          ports:
+            - containerPort: 80
+          env:
+            - name: JUPYTER
+              value: "jupyter lab --ip=0.0.0.0 --allow-root --NotebookApp.custom_display_url=http://127.0.0.1:8888"
+            - name: SERVER_HOST
+              value: "http://your-domain-or-ip"  # Replace with your actual domain or IP
+          volumeMounts:
+            - name: app-volume
+              mountPath: /app
+      volumes:
+        - name: app-volume
+          hostPath:
+            path: /path/to/your/app  # Replace with the path to your application code
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-service
+spec:
+  selector:
+    app: app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer  # Change this to your desired service type

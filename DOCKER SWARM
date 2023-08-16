@@ -1,0 +1,8 @@
+docker swarm init
+docker network create --scope swarm backend
+docker network create --scope swarm db
+docker stack deploy -c docker-compose.yml apifest
+
+docker service scale STACK_NAME_servicename=REPLICAS
+
+docker join --token 

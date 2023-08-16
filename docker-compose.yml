@@ -1,0 +1,129 @@
+version: "3.3"
+services:
+
+
+  api:  
+    ports:
+      - "8090:80"
+      - "8888:8888"
+    restart: always
+    container_name: api
+    image: api:latest
+    volumes:
+      - ./app:/app
+    networks:
+      backend:
+      db:
+        # internal:true
+      
+    # networks:
+    #   qubanga-public:
+    #     ipv4_address: 172.22.0.2
+      
+     # loribaridi_postgres_default:
+    environment:
+      - JUPYTER=jupyter lab --ip=0.0.0.0 --allow-root --NotebookApp.custom_display_url=http://127.0.0.1:8888
+      # - SERVER_HOST=http://${DOMAIN?Variable not set}
+    build:
+      context: .
+      dockerfile: ./backend.dockerfile
+      # args:
+      #   INSTALL_DEV: ${INSTALL_DEV-true}
+      #   INSTALL_JUPYTER: ${INSTALL_JUPYTER-true}
+   
+    # command: ./start.sh
+    #   - alembic init alembic
+    #   - bash -c "while true; do sleep 10; done"  
+    #   - /start-reload.sh
+    env_file:
+      - .env
+    # command: uvicorn app.app.main:app --host 0.0.0.0 --port 80
+    # labels:
+    #   - traefik.enable=true
+    #   - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
+    #   - traefik.http.routers.${STACK_NAME?Variable not set}-api-http.rule=PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`)
+    #   - traefik.http.services.${STACK_NAME?Variable not set}-api.loadbalancer.server.port=80
+
+    # pgadmin
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    networks:
+      backend:
+      db:
+
+    #   - default
+    # command:
+    #   - ln -snf /usr/share/zoneinfo/${TZ?Africa/Nariob} /etc/localtime 
+    #   - "echo ${TZ?Afica/Nariob} > /etc/timezone" 
+    #      # loribaridi_postgres_default:
+    restart: always    
+    depends_on:
+      - db
+    env_file:
+      - .env
+    ports:
+      - "5051:5050"
+       # pgadmin:
+  #   ports:
+  #     - "5050:5050"
+    # deploy:
+    #   labels:
+    #     - traefik.enable=true
+    #     - traefik.docker.network=${TRAEFIK_PUBLIC_NETWORK?Variable not set}
+    #     - traefik.constraint-label=${TRAEFIK_PUBLIC_TAG?Variable not set}
+    #     - traefik.http.routers.${STACK_NAME?Variable not set}-pgadmin-http.rule=Host(`pgadmin.${DOMAIN?Variable not set}`)
+    #     - traefik.http.routers.${STACK_NAME?Variable not set}-pgadmin-http.entrypoints=http
+    #     - traefik.http.routers.${STACK_NAME?Variable not set}-pgadmin-http.middlewares=${STACK_NAME?Variable not set}-https-redirect
+    #     - traefik.http.routers.${STACK_NAME?Variable not set}-pgadmin-https.rule=Host(`pgadmin.${DOMAIN?Variable not set}`)
+    #     - traefik.http.routers.${STACK_NAME?Variable not set}-pgadmin-https.entrypoints=https
+    #     - traefik.http.routers.${STACK_NAME?Variable not set}-pgadmin-https.tls=true
+    #     - traefik.http.routers.${STACK_NAME?Variable not set}-pgadmin-https.tls.certresolver=le
+    #     - traefik.http.services.${STACK_NAME?Variable not set}-pgadmin.loadbalancer.server.port=5050
+
+  db:
+    image: db:latest 
+   
+    build:
+      context:  .
+      dockerfile: ./postgres.dockerfile
+    networks:
+       db:
+       
+    restart: always
+    ports:
+      - "5434:5432"
+    env_file:
+      - .env
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      # - TZ=GMT+3
+      # - PGTZ=Africa/Nairobi
+    container_name: db
+    # platform: linux/x86_64
+    # volumes:
+    #   - app-qubangadb-data:/var/lib/postgresql/data/pgdata
+    # command: /timezone.sh
+    # command: ln -snf /usr/share/zoneinfo/${TZ?Afica/Nariob} /etc/localtime &&  echo ${TZ?Afica/Nariob} > /etc/timezone "  
+      # volumes:
+    #   - data:/var/lib/postgresql/data/pgdata
+   
+    tty: true
+    # deploy:
+    #   placement:
+    #     constraints:
+    #       - node.labels.${STACK_NAME?Variable not set}.app-qubangadb-data == true
+    #     # deploy:
+    #   labels:
+    #     - traefik.enable=true
+    #     - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
+    #     - traefik.http.routers.${STACK_NAME?Variable not set}-qubangadb-http.rule=PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`)
+    #     - traefik.http.services.${STACK_NAME?Variable not set}-qubangadb.loadbalancer.server.port=80
+volumes:
+  app-apifest-data:
+networks:
+  db:
+    external: true
+  backend:
+     external: true
+    

@@ -1,0 +1,53 @@
+version: "3.3"
+services:
+  api:  
+    ports:
+      - "8090:80"
+      - "8888:8888"
+    restart: always
+    container_name: api
+    volumes:
+      - ./app:/app
+    networks:
+      backend:
+      db:
+     
+      context: .
+      dockerfile: ./backend.dockerfile
+   
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    networks:
+      backend:
+      db:
+    depends_on:
+      - db  
+
+  db:
+    image: db:latest 
+   
+    build:
+      context:  .
+      dockerfile: ./postgres.dockerfile
+    networks:
+       db:
+       
+       tty: true
+    deploy:
+      placement:
+        constraints:
+          - node.labels.${STACK_NAME?Variable not set}.app-qubangadb-data == true
+        # deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
+        - traefik.http.routers.${STACK_NAME?Variable not set}-qubangadb-http.rule=PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`)
+        - traefik.http.services.${STACK_NAME?Variable not set}-qubangadb.loadbalancer.server.port=80
+volumes:
+  app-apifest-data:
+networks:
+  db:
+    external: false
+  backend:
+    

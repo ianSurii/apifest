@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "app"
+version = "0.1.0"
+description = ""
+authors = ["Ian Surii <ianmuthur@outlook.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+uvicorn = "^0.23.2"
+alembic = "^1.11.2"
+python-dotenv = "^1.0.0"
+fastapi = "^0.101.0"
+starlette = "0.27"
+africastalking = "^1.2.5"
+pydantic-settings = "^2.0.2"
+pydantic = {extras = ["email"], version = "^2.1.1"}
+tenacity = "^8.2.2"
+sqlalchemy = "^2.0.19"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
